@@ -1,26 +1,47 @@
-
 import 'package:flutter/material.dart';
 
 class LoginScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: Text("Tasted"),
+        ),
+        body: LoginForm());
+  }
+}
+
+class LoginForm extends StatefulWidget {
+  @override
+  LoginFormState createState() {
+    return LoginFormState();
+  }
+}
+
+class LoginFormState extends State<LoginForm> {
+  final _loginFormKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Tasted"),
-      ),
-      body: Column(
-        children: <Widget>[
-          Icon(Icons.fastfood),
-          EmailInput(),
-          PasswordInput(),
-          LoginButton()
-        ],
-      ),
-    );
+    return Form(
+        key: _loginFormKey,
+        child: Column(
+          children: <Widget>[
+            EmailInput(),
+            PasswordInput(),
+            RaisedButton(
+              color: Colors.amberAccent,
+              onPressed: () {
+                if (_loginFormKey.currentState.validate()) {
+                  Scaffold.of(context)
+                      .showSnackBar(SnackBar(content: Text('Logging in...')));
+                }
+              },
+              child: Text("Login"),
+            )
+          ],
+        ));
   }
-
 }
 
 class EmailInput extends StatelessWidget {
@@ -29,8 +50,14 @@ class EmailInput extends StatelessWidget {
     return TextFormField(
       decoration: InputDecoration(
         icon: Icon(Icons.email),
+        labelText: 'Email'
       ),
-      initialValue: "Email",
+      validator: (value) {
+        if (value.isEmpty) {
+          return 'No email provided';
+        }
+        return null;
+      },
     );
   }
 }
@@ -41,23 +68,15 @@ class PasswordInput extends StatelessWidget {
     return TextFormField(
       decoration: InputDecoration(
         icon: Icon(Icons.lock),
+        labelText: 'Password'
       ),
-      initialValue: "Password",
       obscureText: true,
-    );
-  }
-}
-
-class LoginButton extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return FlatButton(
-      color: Colors.amberAccent,
-      onPressed: () {
-
+      validator: (value) {
+        if (value.isEmpty) {
+          return 'No password provided';
+        }
+        return null;
       },
-      child: Text("Login"),
     );
   }
-
 }
