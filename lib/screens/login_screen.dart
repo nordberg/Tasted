@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginScreen extends StatelessWidget {
   @override
@@ -20,6 +21,8 @@ class LoginForm extends StatefulWidget {
 
 class LoginFormState extends State<LoginForm> {
   final _loginFormKey = GlobalKey<FormState>();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final loginController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -33,8 +36,7 @@ class LoginFormState extends State<LoginForm> {
               color: Colors.amberAccent,
               onPressed: () {
                 if (_loginFormKey.currentState.validate()) {
-                  Scaffold.of(context)
-                      .showSnackBar(SnackBar(content: Text('Logging in...')));
+                  _handleSignIn();
                 }
               },
               child: Text("Login"),
@@ -42,9 +44,19 @@ class LoginFormState extends State<LoginForm> {
           ],
         ));
   }
+
+  Future<FirebaseUser> _handleSignIn() async {
+    final FirebaseUser user = (await _auth.signInWithEmailAndPassword(email: loginController.text, password: 'abc123'));
+    print('Signed in ' + user.email);
+    return user;
+  }
 }
 
 class EmailInput extends StatelessWidget {
+  final TextEditingController loginController;
+
+  EmailInput({this.loginController});
+
   @override
   Widget build(BuildContext context) {
     return TextFormField(
@@ -52,6 +64,7 @@ class EmailInput extends StatelessWidget {
         icon: Icon(Icons.email),
         labelText: 'Email'
       ),
+      controller: this.loginController,
       validator: (value) {
         if (value.isEmpty) {
           return 'No email provided';
