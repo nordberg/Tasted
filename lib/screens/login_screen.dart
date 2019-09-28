@@ -1,6 +1,9 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
+import 'package:tasted/screens/feed_screen.dart';
 
 class LoginScreen extends StatelessWidget {
   @override
@@ -44,9 +47,10 @@ class LoginFormState extends State<LoginForm> {
                 if (_loginFormKey.currentState.validate()) {
                   // _handleSignIn(_authBloc.email, _authBloc.password);
                   _handleSignIn(_authBloc.email, _authBloc.password)
-                      .then((FirebaseUser user) => print(user))
+                      .then((FirebaseUser user) => this.onSuccesfulLogin(user))
                       .catchError((e) {
-                    _authBloc.errorMsg = 'Failed to log in user';
+                        log('Failed to authenticate ${_authBloc.email}');
+                        _authBloc.errorMsg = 'Failed to authenticate.';
                   });
                 }
               },
@@ -57,10 +61,17 @@ class LoginFormState extends State<LoginForm> {
         ));
   }
 
+  void onSuccesfulLogin(FirebaseUser user) {
+    log('Succesfully authenticated ${user.email}');
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => Feed())
+    );  // TODO: This gives a "back" action to the login page...
+  }
+
   Future<FirebaseUser> _handleSignIn(String email, String password) async {
     final FirebaseUser user = (await _auth.signInWithEmailAndPassword(
         email: email, password: password));
-    print('Signed in ' + user.email);
     return user;
   }
 }
@@ -73,7 +84,6 @@ class EmailInput extends StatefulWidget {
 }
 
 class _EmailInputState extends State<EmailInput> {
-
   final emailController = TextEditingController();
 
   @override
@@ -143,10 +153,6 @@ class _PasswordInputState extends State<PasswordInput> {
   void dispose() {
     passwordController.dispose();
     super.dispose();
-  }
-
-  void addPasswordToBloc() {
-
   }
 }
 
