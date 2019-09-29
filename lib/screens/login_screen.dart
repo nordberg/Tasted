@@ -1,23 +1,17 @@
 import 'dart:developer';
 
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:provider/provider.dart';
-import 'package:tasted/screens/feed_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:tasted/main.dart';
 
 class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider<AuthBloc>.value(value: AuthBloc()),
-      ],
-      child: Scaffold(
-          appBar: AppBar(
-            title: Text("Tasted"),
-          ),
-          body: LoginForm()),
-    );
+    return Scaffold(
+        appBar: AppBar(
+          title: Text("Tasted"),
+        ),
+        body: LoginForm());
   }
 }
 
@@ -30,38 +24,66 @@ class LoginForm extends StatefulWidget {
 
 class LoginFormState extends State<LoginForm> {
   final _loginFormKey = GlobalKey<FormState>();
+  final _authBloc = AuthBloc();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
   Widget build(BuildContext context) {
-    final AuthBloc _authBloc = Provider.of<AuthBloc>(context);
     return Form(
         key: _loginFormKey,
         child: Column(
           children: <Widget>[
-            EmailInput(),
-            PasswordInput(),
+            TextFormField(
+              decoration: InputDecoration(
+                labelText: 'Email',
+              ),
+              validator: (val) {
+                if (val.isEmpty) {
+                  return 'Please enter an email';
+                }
+                return null;
+              },
+              onSaved: (val) {
+                _authBloc._email = val;
+              },
+            ),
+            TextFormField(
+              decoration: InputDecoration(
+                labelText: 'Password',
+              ),
+              obscureText: true,
+              validator: (val) {
+                if (val.isEmpty) {
+                  return 'Please enter a password';
+                }
+                return null;
+              },
+              onSaved: (val) {
+                _authBloc._password = val;
+              },
+            ),
             RaisedButton(
               color: Colors.amberAccent,
               onPressed: () {
-                if (_loginFormKey.currentState.validate()) {
-                  // _handleSignIn(_authBloc.email, _authBloc.password);
-                  _handleSignIn(_authBloc.email, _authBloc.password)
-                      .then((FirebaseUser user) => this.onSuccesfulLogin(user))
+                final form = _loginFormKey.currentState;
+                if (form.validate()) {
+                  form.save();
+                  _handleSignIn(_authBloc._email, _authBloc._password)
+                      .then((FirebaseUser user) => this.onSuccessfulLogin(user))
                       .catchError((e) {
-                        log('Failed to authenticate ${_authBloc.email}');
-                        _authBloc.errorMsg = 'Failed to authenticate.';
+                    log('Failed to authenticate ${_authBloc._email} due to $e.');
+                    _authBloc._errorMsg = 'Failed to authenticate.';
                   });
                 }
               },
               child: Text("Login"),
             ),
-            Text(_authBloc.errorMsg),
+            Text(_authBloc._errorMsg),
           ],
         ));
   }
 
-  void onSuccesfulLogin(FirebaseUser user) {
+  void onSuccessfulLogin(FirebaseUser user) {
     log('Succesfully authenticated ${user.email}');
     Navigator.pushReplacement(
       context,
@@ -76,109 +98,8 @@ class LoginFormState extends State<LoginForm> {
   }
 }
 
-class EmailInput extends StatefulWidget {
-  EmailInput();
-
-  @override
-  _EmailInputState createState() => _EmailInputState();
-}
-
-class _EmailInputState extends State<EmailInput> {
-  final emailController = TextEditingController();
-
-  @override
-  Widget build(BuildContext context) {
-    final _authBloc = Provider.of<AuthBloc>(context);
-
-    emailController.addListener(() {
-      emailController.addListener(() {
-        _authBloc.email = emailController.text;
-      });
-    });
-
-    return TextFormField(
-      decoration: InputDecoration(icon: Icon(Icons.email), labelText: 'Email'),
-      validator: (value) {
-        if (value.isEmpty) {
-          return 'No email provided';
-        }
-        return null;
-      },
-      controller: emailController,
-    );
-  }
-
-  @override
-  void dispose() {
-    emailController.dispose();
-    super.dispose();
-  }
-}
-
-class PasswordInput extends StatefulWidget {
-  @override
-  _PasswordInputState createState() => _PasswordInputState();
-}
-
-class _PasswordInputState extends State<PasswordInput> {
-  final passwordController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final _authBloc = Provider.of<AuthBloc>(context);
-    passwordController.addListener(() {
-      _authBloc.password = passwordController.text;
-    });
-
-    return TextFormField(
-      decoration:
-          InputDecoration(icon: Icon(Icons.lock), labelText: 'Password'),
-      obscureText: true,
-      validator: (value) {
-        if (value.isEmpty) {
-          return 'No password provided';
-        }
-        return null;
-      },
-      controller: passwordController,
-    );
-  }
-
-  @override
-  void dispose() {
-    passwordController.dispose();
-    super.dispose();
-  }
-}
-
-class AuthBloc extends ChangeNotifier {
+class AuthBloc {
   String _email = '';
   String _password = '';
   String _errorMsg = '';
-
-  String get email => _email;
-
-  String get password => _password;
-
-  String get errorMsg => _errorMsg;
-
-  set password(String val) {
-    _password = val;
-    notifyListeners();
-  }
-
-  set email(String val) {
-    _email = val;
-    notifyListeners();
-  }
-
-  set errorMsg(String val) {
-    _errorMsg = val;
-    notifyListeners();
-  }
 }
