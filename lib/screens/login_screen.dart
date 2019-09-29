@@ -63,10 +63,10 @@ class LoginFormState extends State<LoginForm> {
 
   void onSuccesfulLogin(FirebaseUser user) {
     log('Succesfully authenticated ${user.email}');
-    Navigator.push(
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => Feed())
-    );  // TODO: This gives a "back" action to the login page...
+    );
   }
 
   Future<FirebaseUser> _handleSignIn(String email, String password) async {
