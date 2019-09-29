@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tasted/screens/add_review_screen.dart';
 
 class Feed extends StatefulWidget {
   @override
@@ -27,6 +28,10 @@ class _FeedState extends State<Feed> {
           ),
         ],
       )),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Navigator.push(
+            context, MaterialPageRoute(builder: (context) => AddReview())),
+      ),
     );
   }
 }
