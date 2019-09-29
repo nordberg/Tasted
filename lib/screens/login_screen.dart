@@ -85,10 +85,7 @@ class LoginFormState extends State<LoginForm> {
 
   void onSuccessfulLogin(FirebaseUser user) {
     log('Succesfully authenticated ${user.email}');
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => Feed())
-    );
+    Navigator.pushReplacementNamed(context, TastedApp.FEED_SCREEN);
   }
 
   Future<FirebaseUser> _handleSignIn(String email, String password) async {
