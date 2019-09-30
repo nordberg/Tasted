@@ -15,10 +15,8 @@ class ReviewCard extends StatelessWidget {
         children: <Widget>[
           ListTile(
             leading: Icon(Icons.fastfood),
-            title: Text(this.review.dish.toString()),
-            subtitle: Text(this.review.reviewedBy.toString() +
-                ' at ' +
-                this.review.restaurant.name),
+            title: Text(this.review.restaurant.name),
+            subtitle: Text(this.review.reviewedBy.fullName),
           ),
         ],
       ),

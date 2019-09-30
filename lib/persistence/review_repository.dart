@@ -1,31 +1,19 @@
-import 'package:tasted/models/dish.dart';
-import 'package:tasted/models/restaurant.dart';
+import 'dart:developer';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tasted/models/review.dart';
-import 'package:tasted/models/user.dart';
 
 class ReviewRepository {
-  List<Review> get allReviews {
-    return [
-      Review(Restaurant('Emily\'s'), User('Marcus', 'Nordberg'), 5.0,
-          Dish('Double Stacked Burger')),
-      Review(Restaurant('Emily\'s'), User('Marcus', 'Nordberg'), 5.0,
-          Dish('Double Stacked Burger')),
-      Review(Restaurant('Emily\'s'), User('Marcus', 'Nordberg'), 5.0,
-          Dish('Double Stacked Burger')),
-      Review(Restaurant('Emily\'s'), User('Marcus', 'Nordberg'), 5.0,
-          Dish('Double Stacked Burger')),
-      Review(Restaurant('Emily\'s'), User('Marcus', 'Nordberg'), 5.0,
-          Dish('Double Stacked Burger')),
-      Review(Restaurant('Emily\'s'), User('Marcus', 'Nordberg'), 5.0,
-          Dish('Double Stacked Burger')),
-      Review(Restaurant('Emily\'s'), User('Marcus', 'Nordberg'), 5.0,
-          Dish('Double Stacked Burger')),
-      Review(Restaurant('Emily\'s'), User('Marcus', 'Nordberg'), 5.0,
-          Dish('Double Stacked Burger')),
-      Review(Restaurant('Emily\'s'), User('Marcus', 'Nordberg'), 5.0,
-          Dish('Double Stacked Burger')),
-      Review(Restaurant('Emily\'s'), User('Marcus', 'Nordberg'), 5.0,
-          Dish('Double Stacked Burger')),
-    ];
+  Future<List<Review>> allReviews() async {
+    Future<List> futureReviewSnapshots =
+        Firestore.instance.collection('reviews').snapshots().toList();
+    var reviewSnapshots = await futureReviewSnapshots;
+    return reviewSnapshots.map(reviewDeserializer);
+  }
+
+  Review reviewDeserializer(snapshot) {
+    log('Parsing $snapshot');
+    return Review(snapshot.data['restaurant'], snapshot.data['reviewedBy'],
+        snapshot.data['rating']);
   }
 }

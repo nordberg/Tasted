@@ -5,15 +5,28 @@ import 'package:tasted/screens/add_review_screen.dart';
 import 'package:tasted/widgets/review_card.dart';
 
 class Feed extends StatefulWidget {
-  final ReviewRepository repository = ReviewRepository();
   @override
-  _FeedState createState() => _FeedState(repository.allReviews);
+  _FeedState createState() => _FeedState();
 }
 
 class _FeedState extends State<Feed> {
-  final List<Review> _reviews;
+  final ReviewRepository repository = ReviewRepository();
+  List<Review> _reviews;
 
-  _FeedState(this._reviews);
+  _FeedState();
+
+  @override
+  void initState() {
+    _getReviews();
+    super.initState();
+  }
+
+  void _getReviews() async {
+    var allReviews = await repository.allReviews();
+    setState(() {
+      _reviews = allReviews;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,11 +34,9 @@ class _FeedState extends State<Feed> {
       appBar: AppBar(
         title: Text('Reviews'),
       ),
-      body: ListView.builder(
-          itemCount: _reviews.length,
-          itemBuilder: (context, index) {
-            return ReviewCard(_reviews[index]);
-          }),
+      body: ListView.builder(itemBuilder: (context, index) {
+        return ReviewCard(_reviews[index]);
+      }),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.push(
             context, MaterialPageRoute(builder: (context) => AddReview())),
